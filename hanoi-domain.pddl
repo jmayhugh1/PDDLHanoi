@@ -1,63 +1,97 @@
-;; The Towers of Hanoi problem (formalisation by Hector Geffner).
-
 (define (domain hanoi)
-  (:requirements :strips)
-  (:predicates (clear ?x) (on ?x ?y) (smaller ?x ?y) (is_disc ?x) (is_pillar ?y))
-
+  (:requirements :strips :universal-preconditions :negative-preconditions :disjunctive-preconditions :conditional-effects)
+  (:predicates 
+    (clear ?x) 
+    (on ?x ?y) 
+    (smaller ?x ?y) 
+    (is_disc ?x)
+    (is_peg ?x)
+  )
+  
   (:action move
-    :parameters (?disc ?from ?to)
-    :precondition (and 
-                  (is_disc ?disc)  ;; is the thing moving a disc
-                  ; (not (= ?disc ?from))  ;; disc is not the same as from
-                  ; (not (= ?disc ?to))  ;; disc is not the same as to
-                  ; (not (= ?from ?to))  ;; from is not the same as to
-                  (or(is_pillar ?from) (is_disc ?from))  ;; is the thing moving from a pillar or a disk
-                  (or(is_pillar ?to) (is_disc ?to))  ;; is the thing moving to a pillar or a disk
-                  (or(is_pillar ?to) (smaller ?disc ?to))   ;; is the thing moving to a pillar or is the disk smaller
-                  (on ?disc ?from)   ;; is the disc actually on the from pillar
-                  (clear ?disc) ;; is the thing you are moving clear
-                  (clear ?to)) ;; is the thing you are moving to clear
+    :parameters (?disc ?from ?to )
+    :precondition (and
+                    (is_disc ?disc)
+                    (is_peg ?from)
+                    (is_peg ?to)
+                    (on ?disc ?from) ; disc is on the from peg
+                    (clear ?disc)      ;  disc is clear
+                    ;(clear ?to)        ;  peg is clear
+                    (forall (?other)  ; For all other disks it either cant be on to peg or ig it h
+                      ; (or
+                      ; (not (is_disc ?other))
+                      ; (or
+                      ;   (not (on ?other ?to))  ;  other disk is not on the to peg
+                      ;   (smaller ?disc ?other) ; Or the moving disk is smaller than any disk on the to peg
+                      ; )
+                      
+                      ; )
+                    
+                      (when (is_disc ?other) 
+                      (or (not (on ?other ?to) (smaller ?disc ?other))))
+                    )
+                  )
+    :effect (and
+              (forall (?other) 
+                
+                (when (on ?disc ?other)
+                  (clear ?other))  ; Clear any disc that was under the moving disc
+                
+              )
+              (not (on ?disc ?from)) ; disc is no longer on the from peg
 
+              (when (forall (?other) (not (on ?other ?from)))
+                    (clear ?from)   ; Clear the from peg if no other discs remain
+              )
 
-                  
-  :effect         (and 
-                  (clear ?from)  ;; now from is clear
-                  (on ?disc ?to)  ;; now disc is on to
-                  (not (on ?disc ?from))  ;; now disc is not not on from
-                  (not (clear ?to)))  ;; now to is not clear
-                  
+              (forall (?other)
+                (when (and (on ?other ?to) (clear ?other))  ; For any disc on the to peg that is clear
+                  (not (clear ?other))  ; no longer clear ?
+                  (on ?other ?to)
+                )
+              )
+              (on ?disc ?to)        ; The disc is now on the to peg
+              (not (clear ?to))     ; The to peg is no longer clear
+              (clear ?disc)         ; The moving disc remains clear
+            )
   )
 )
-  ;; all we care abpu is that the thing yu are moving it from -> disc is on from, 
-  ;; is the thing moving a disc
-  ;; disc is no the same as from or to
-  ;; is the thing moving from a pillar
-  ;; is the thing moving to a pillar or 
-  ;; is the thing moving to a pillar or is the disk smaller
-  ;; is the disc on the from pillar
+
+;; move last thing from pillar
+
+;;effect 
+;; for all the discs or pillars that the disc is on, the disc is no longer on the pillar
+; (and
+            
+;               ;; marking the disc beneath it clear
+;               ;; if the disc being moved was on another disk then that disk is now clear
+;               (forall (?other) 
+;                 (or 
+;                 (not(is_disc ?other))
+;                 (when (on ?disc ?other)
+;                   (clear ?other))
+;                 )
+;               )
 
 
+;               (not (on ?disc ?from)) ; The disc is no longer on the from peg
+             
 
-  ;; 
-  ; :precondition (and (is_disc ?disc)  ;; is the thing moving a disc
-  ;  (or(is_pillar ?from) (is_disc ?from)   ;; is the thing moving from a pillar or a disk
-  ;  (or(is_pillar ?to) (is_disc ?to))  ;; is the thing moving to a pillar or a disk
-  ;  (or(is_pillar ?to) (smaller ?disc ?to))   ;; is the thing moving to a pillar or is the disk smaller
-  ;  (on ?disc ?from)   ;; is the disc actually on the from pillar
-  ;  (clear ?disc) ;; is the thing you are moving clear
-  ;  (clear ?to)) ;; is the thing you are moving to clear
-  ; :effect  (and (clear ?from)  ;; now from is clear
-  ;   (on ?disc ?to)  ;; now disc is on to
-  ;   (not (on ?disc ?from))  ;; now disc is not not on from
-  ;   (not (clear ?to)))  ;; now to is not clear
-  ;   )
+;               ;; If there are no disks left on the peg from which a disk was 
+;               ;; just moved (?from), then mark that peg (?from) as clear.
+;               (when (forall (?other )(not (on ?other ?from)))
+;                     (clear ?from)   ;; clearing the to peg
+;               )
 
-;;effecys
-  ;; now from is clear
-  ;; now disc is not not on from
-  ;; now disk is on to
-  ;; now to is not clear
-  ;; now disk is clear
-
-
-
+;               ;; now for every disc that is on the to peg
+;               ;; and is currently clear, it is no longer clear and the disc is now on it ->>> shouldnt be more than one
+;               (forall (?other - disk)
+;                 (when (and (on ?other ?to) (clear ?other)) ;; if it was marked clear then it is no longer clear
+;                   (not (clear ?other))
+;                   (on ?other ?to)
+;                 )
+;               )
+;               (on ?disc ?to)         ; The disc is now on the to peg
+;               (not (clear ?to))      ; The to peg is no longer clear
+;               (clear ?disc)         ; The disc is now clear
+;             )

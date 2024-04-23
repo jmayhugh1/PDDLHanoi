@@ -1,48 +1,52 @@
-(define (problem hanoi-3-discs)
+(define (problem hanoi-problem)
   (:domain hanoi)
-  
   (:objects
-    disc1 
-    disc2
-    disc3
-    
-    peg1 
-    peg2 
-    peg3
+    disk1 disk2 
+    peg1 peg2 peg3
   )
-  
-
-  
   (:init
-    (is_disc disc1)
-    (is_disc disc2)
-    (is_disc disc3)
-
-    (is_pillar peg1)
-    (is_pillar peg2)
-    (is_pillar peg3)
-
-    (on disc1 disc3)
-    (on disc2 peg2)
-    (on disc3 peg1)
     
-    (smaller disc1 disc2)
-    (smaller disc1 disc3)
-    (smaller disc2 disc3)
+    (is_disc disk1)
+    (is_disc disk2)
+
+    (is_peg peg1)
+    (is_peg peg2)
+    (is_peg peg3)
+
+    
+    (on disk1 peg1)  ; Disk 1 is on peg 1
+    (on disk2 peg1)  ; Disk 2 is on peg 1
+    (on disk1 disk2)  ; Disk 1 is on peg 1
+   
+    (clear disk1)    ; Disk 1 is clear, it's on top
+    (smaller disk1 disk2)  ; Disk 1 is smaller than Disk 2
 
    
-    (clear disc1)
-    (clear disc2)
-    (clear peg3)
-    
+    (clear peg2)     ; Peg 2 is clear
+    (clear peg3)     ; Peg 3 is clear
   )
-
   (:goal
     (and
-      (on disc1 disc2)
-      (on disc2 disc3)
-      (on disc3 peg3)
+      (on disk1 peg3)  ; Disk 1 should be on peg 3
+      (on disk2 peg3)  ; Disk 2 should be on peg 3
+      
       
     )
   )
 )
+    ; (on disk1 peg1)  ; Disk 1 is on peg 1
+    ; (on disk2 peg1)  ; Disk 2 is on peg 1
+    ; (on disk1 disk2)  ; Disk 1 is on peg 1
+   
+    ; (clear disk1)    ; Disk 1 is clear, it's on top
+    ; (smaller disk1 disk2)  ; Disk 1 is smaller than Disk 2
+
+   
+    ; (clear peg2)     ; Peg 2 is clear
+    ; (clear peg3)     ; Peg 3 is clear
+
+    ; move (disk1 peg1 peg3)
+    ; for disk1 disk2 either not in peg3 or disk1 smaller than
+
+    ; effect 
+  
