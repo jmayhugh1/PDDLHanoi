@@ -93,6 +93,15 @@
               (clear ?from_on)
       )
   )
+  (:action make_smaller
+      :parameters (?disc1 ?disc2 ?disc3)
+      :precondition (and 
+                    (smaller ?disc1 ?disc2)
+                    (smaller ?disc2 ?disc3)
+      )
+      :effect (smaller ?disc1 ?disc3)
+  )
+  
   
 )
   ;; all we care abpu is that the thing yu are moving it from -> disc is on from, 
